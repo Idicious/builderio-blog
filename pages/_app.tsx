@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import { SessionProvider } from "next-auth/react";
 import type { AppProps } from "next/app";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function App({
   Component,
@@ -11,6 +12,7 @@ export default function App({
     <SessionProvider session={session}>
       <Component {...pageProps} />
       <Analytics />
+      <SpeedInsights />
     </SessionProvider>
   );
 }
