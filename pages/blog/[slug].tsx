@@ -5,6 +5,7 @@ import DefaultErrorPage from "next/error";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useSession, signIn, signOut } from "next-auth/react";
 import Card from "../../components/Card/Card";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
@@ -15,8 +16,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   // Fetch the builder content for the given page
   const page = await builder
     .get("blog-post", {
-      userAttributes: {
-        slug: params?.slug,
+      query: {
+        data: {
+          slug: params?.slug,
+        },
       },
     })
     .toPromise();
@@ -39,7 +42,11 @@ export async function getStaticPaths() {
 
   // Generate the static paths for all pages in Builder
   return {
-    paths: blogPosts.map((page) => `/blog/${page.data?.slug}`),
+    paths: blogPosts.map((page) => ({
+      params: {
+        slug: page.data?.slug,
+      },
+    })),
     fallback: "blocking",
   };
 }
@@ -48,6 +55,7 @@ export async function getStaticPaths() {
 export default function Page({ page }: { page: BuilderContent | null }) {
   const router = useRouter();
   const isPreviewing = useIsPreviewing();
+  const { data: session, status } = useSession();
 
   // If the page content is not available
   // and not in preview mode, show a 404 error page
@@ -62,9 +70,25 @@ export default function Page({ page }: { page: BuilderContent | null }) {
       <Head>
         <title>{page?.data?.title}</title>
       </Head>
-      <Card header={page?.data?.title || ""}>
-        <pre>{JSON.stringify(page?.data, null, 2)}</pre>
-      </Card>
+
+      {status === "loading" && <p>Loading...</p>}
+
+      {status === "authenticated" && (
+        <Card header={page?.data?.title || ""}>
+          <button onClick={() => signOut()}>Sign out</button>
+          <pre>{JSON.stringify(page?.data, null, 2)}</pre>
+          <pre>{JSON.stringify(session, null, 2)}</pre>
+        </Card>
+      )}
+
+      {status === "unauthenticated" && (
+        <>
+          <button onClick={() => signIn("github")}>Sign in</button>
+          <p>Not authenticated</p>
+        </>
+      )}
+
+      {/* Render the Builder page */}
     </>
   );
 }
