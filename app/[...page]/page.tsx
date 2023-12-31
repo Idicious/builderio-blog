@@ -1,5 +1,7 @@
 import { builder } from "@builder.io/sdk";
+import { signOut } from "next-auth/react";
 import { RenderBuilderContent } from "../../components/builder";
+import { Session } from "./Session";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
 
@@ -37,6 +39,7 @@ export default async function Page(props: PageProps) {
 
   return (
     <>
+      <Session />
       {/* Render the Builder page */}
       <RenderBuilderContent content={content} />
     </>

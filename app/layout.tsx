@@ -1,5 +1,6 @@
-import { Metadata } from "next";
 import "./globals.css";
+import { Metadata } from "next";
+import NextAuthSessionProvider from "../providers/SessionProvider";
 
 export const metadata: Metadata = {
   title: "BuilderIO Next.js Example",
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <NextAuthSessionProvider>{children}</NextAuthSessionProvider>
+      </body>
     </html>
   );
 }
